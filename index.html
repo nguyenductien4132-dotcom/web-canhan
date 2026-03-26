@@ -616,7 +616,8 @@ Quy tắc trả lời:
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Error: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(`HT Lỗi: ${response.status} - ${errorText}`);
                 }
                 
                 const data = await response.json();
@@ -631,7 +632,7 @@ Quy tắc trả lời:
             } catch (err) {
                 console.error("Lỗi:", err);
                 removeTypingIndicator();
-                addMessage("⚠️ **Lỗi hệ thống:** Xin lỗi, API hiện không khả dụng. Bạn vui lòng thử lại sau.", true);
+                addMessage("⚠️ **Lỗi Error:** " + err.message, true);
                 // Remove the last user message to allow retry
                 messageHistory.pop();
             }
