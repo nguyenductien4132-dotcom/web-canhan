@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NGUYEN VAN A | Seaport Equipment Management Expert</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed": "#351000",
+              "on-surface-variant": "#44474e",
+              "primary-fixed": "#d6e3ff",
+              "surface-container-highest": "#e2e2e4",
+              "primary-container": "#1b365d",
+              "inverse-surface": "#2f3132",
+              "primary": "#002046",
+              "on-primary": "#ffffff",
+              "secondary-fixed": "#d1e4ff",
+              "surface-container-high": "#e8e8ea",
+              "outline": "#74777f",
+              "secondary-fixed-dim": "#b2c8e6",
+              "on-surface": "#1a1c1d",
+              "surface-bright": "#f9f9fb",
+              "background": "#f9f9fb",
+              "surface-container-low": "#f3f3f5",
+              "on-primary-fixed": "#001b3d",
+              "tertiary-fixed-dim": "#ffb693",
+              "primary-fixed-dim": "#aec7f7",
+              "on-error-container": "#93000a",
+              "on-tertiary": "#ffffff",
+              "on-secondary-fixed-variant": "#324861",
+              "on-secondary": "#ffffff",
+              "surface-container": "#eeeef0",
+              "error-container": "#ffdad6",
+              "on-primary-fixed-variant": "#2e476f",
+              "inverse-on-surface": "#f0f0f2",
+              "tertiary": "#3d1400",
+              "on-secondary-fixed": "#031d34",
+              "surface": "#f9f9fb",
+              "outline-variant": "#c4c6cf",
+              "surface-tint": "#465f88",
+              "on-tertiary-fixed-variant": "#7a3000",
+              "surface-variant": "#e2e2e4",
+              "on-primary-container": "#87a0cd",
+              "tertiary-container": "#5f2400",
+              "on-tertiary-container": "#fd792d",
+              "secondary": "#4a607a",
+              "inverse-primary": "#aec7f7",
+              "surface-dim": "#d9dadc",
+              "error": "#ba1a1a",
+              "on-background": "#1a1c1d",
+              "secondary-container": "#c8dffe",
+              "tertiary-fixed": "#ffdbcc",
+              "on-error": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-container": "#4d637d"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .asymmetric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+        }
+        @media (max-width: 768px) {
+            .asymmetric-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-tertiary-fixed-dim selection:text-on-tertiary-fixed">
+<!-- Header (Shared: TopNavBar) -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none">
+<nav class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
+<div class="text-xl font-black text-blue-900 dark:text-blue-100 tracking-tighter font-manrope">
+                NGUYEN VAN A
+            </div>
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-900 dark:hover:text-blue-200 transition-colors font-manrope font-bold tracking-tight" href="#about">About</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-900 dark:hover:text-blue-200 transition-colors font-manrope font-bold tracking-tight" href="#services">Services</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-900 dark:hover:text-blue-200 transition-colors font-manrope font-bold tracking-tight" href="#projects">Projects</a>
+<a class="px-6 py-2 bg-primary-container text-on-primary font-bold rounded hover:bg-primary transition-all duration-300 transform active:scale-95" href="#contact">Connect Now</a>
+</div>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+</nav>
+</header>
+<main>
+<!-- Hero Section -->
+<section class="relative pt-32 pb-20 px-8 max-w-7xl mx-auto overflow-hidden" id="hero">
+<div class="flex flex-col md:flex-row items-center gap-16">
+<div class="flex-1 space-y-8 z-10">
+<span class="inline-block px-4 py-1 bg-surface-container-high text-primary font-label text-xs font-bold uppercase tracking-widest rounded-full">
+                        Industrial Specialist
+                    </span>
+<h1 class="font-headline font-extrabold text-5xl md:text-6xl text-primary leading-[1.1] tracking-tight">
+                        Tối ưu hóa Hiệu suất &amp; <span class="text-on-tertiary-container">An toàn Thiết bị</span> Cảng biển thông qua Quản lý Chuyên sâu.
+                    </h1>
+<p class="text-secondary text-lg md:text-xl max-w-xl leading-relaxed">
+                        Chuyên gia 16+ năm kinh nghiệm trong vận hành, bảo trì và chiến lược thiết bị cảng. Chuyên về giải pháp STS, RTG và hệ thống quản trị hiện đại.
+                    </p>
+<div class="flex gap-4">
+<a class="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-on-primary bg-primary-container overflow-hidden rounded-md transition-all hover:pr-12" href="#contact">
+<span class="relative">Kết nối ngay</span>
+<span class="absolute right-4 opacity-0 group-hover:opacity-100 transition-all material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</a>
+<a class="inline-flex items-center justify-center px-8 py-4 font-bold text-primary border-2 border-outline-variant hover:bg-surface-container-low transition-all rounded-md" href="#projects">
+                            Dự án tiêu biểu
+                        </a>
+</div>
+</div>
+<div class="flex-1 relative">
+<div class="absolute -top-12 -right-12 w-64 h-64 bg-tertiary-fixed-dim/20 rounded-full blur-3xl -z-10"></div>
+<div class="relative rounded-xl overflow-hidden shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
+<img alt="Maritime Equipment Professional" class="w-full h-[600px] object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700" data-alt="Professional maritime engineer in safety gear standing confidently in front of massive blue ship-to-shore cranes at a busy industrial container port" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1Nr5p-phumUycuNMcud3huXZ8d-_1cUCLxeY37Bvp721aDbLlLKnW75Gqkn_IGAOn2esLg6MbW8kQARets_OoU9CLtWGK1PCxpsUbmYDWDzWHSgQXIQpkaFPmjqwZcE6NCCotf6o2A4zNWKTFzqHeRnzqSSqi2PzfroJ3l2dCqaFXwafHgbZfjSVMzbXoA3RVAxFrx-CHyECPmbuOuwyH7WoI3K5sUaBwyJlwkvzgpo6NfJyeLdEfeD0g3l762oNIRIOx7_nsKDY"/>
+<div class="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-primary/90 to-transparent">
+<div class="flex items-center gap-4 text-white">
+<div class="w-12 h-[2px] bg-tertiary-fixed-dim"></div>
+<p class="text-sm font-label tracking-widest uppercase">Precision Engineering Authority</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- About Me Section -->
+<section class="py-24 bg-surface-container-low" id="about">
+<div class="max-w-7xl mx-auto px-8">
+<div class="asymmetric-grid gap-20 items-center">
+<div class="space-y-6">
+<h2 class="font-headline text-4xl font-bold text-primary tracking-tight">Kinh nghiệm &amp; Tầm nhìn</h2>
+<div class="w-20 h-1 bg-tertiary-container"></div>
+</div>
+<div class="space-y-8 text-secondary text-lg leading-relaxed font-body">
+<p>
+                            Hành trình của tôi bắt đầu từ nền tảng kỹ thuật cơ khí, trực tiếp vận hành những cỗ máy khổng lồ tại cầu cảng. Qua hơn 16 năm, tôi đã chuyển mình thành một nhà quản lý chiến lược, nơi tôi kết hợp giữa tri thức kỹ thuật chuyên sâu và tư duy tối ưu hóa hệ thống.
+                        </p>
+<p>
+                            Tôi tin rằng **an toàn** không chỉ là một quy trình, mà là nền tảng của **hiệu suất cao**. Bằng cách áp dụng công nghệ vào quản lý thiết bị (như CMMS), tôi đã giúp các đơn vị cảng biển cắt giảm chi phí bảo trì không cần thiết đồng thời nâng cao chỉ số OEE (Hiệu suất thiết bị tổng thể) một cách bền vững.
+                        </p>
+<div class="grid grid-cols-2 gap-6 pt-4">
+<div class="flex flex-col gap-1">
+<span class="text-3xl font-black text-primary">16+</span>
+<span class="text-sm font-label uppercase text-outline">Năm Kinh Nghiệm</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-3xl font-black text-primary">50+</span>
+<span class="text-sm font-label uppercase text-outline">Dự Án Lớn</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Services & Solutions Section -->
+<section class="py-24 px-8 max-w-7xl mx-auto" id="services">
+<div class="text-center mb-16 space-y-4">
+<span class="text-sm font-label text-tertiary-container font-bold tracking-widest uppercase">Expertise</span>
+<h2 class="font-headline text-4xl font-extrabold text-primary">Giải Pháp &amp; Dịch Vụ Chiến Lược</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<!-- Card 1 -->
+<div class="p-8 bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-b-4 border-transparent hover:border-tertiary-fixed-dim">
+<div class="w-12 h-12 flex items-center justify-center bg-primary-container text-on-primary rounded-lg mb-6">
+<span class="material-symbols-outlined" data-icon="settings_suggest">settings_suggest</span>
+</div>
+<h3 class="font-headline text-xl font-bold text-primary mb-4">Chiến lược Bảo trì</h3>
+<p class="text-secondary text-sm leading-relaxed">Xây dựng quy trình bảo trì phòng ngừa (Preventive) và tiên đoán (Predictive) giúp giảm thiểu tối đa thời gian downtime.</p>
+</div>
+<!-- Card 2 -->
+<div class="p-8 bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-b-4 border-transparent hover:border-tertiary-fixed-dim">
+<div class="w-12 h-12 flex items-center justify-center bg-primary-container text-on-primary rounded-lg mb-6">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+</div>
+<h3 class="font-headline text-xl font-bold text-primary mb-4">Tối ưu hóa Vận hành</h3>
+<p class="text-secondary text-sm leading-relaxed">Nâng cao chỉ số OEE và hiệu suất khai thác thông qua phân tích dữ liệu và cải tiến quy trình kỹ thuật.</p>
+</div>
+<!-- Card 3 -->
+<div class="p-8 bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-b-4 border-transparent hover:border-tertiary-fixed-dim">
+<div class="w-12 h-12 flex items-center justify-center bg-primary-container text-on-primary rounded-lg mb-6">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+</div>
+<h3 class="font-headline text-xl font-bold text-primary mb-4">Tư vấn Đầu tư</h3>
+<p class="text-secondary text-sm leading-relaxed">Đánh giá kỹ thuật chuyên sâu và quản lý thầu mua sắm thiết bị cảng biển (STS, RTG, Reach Stacker).</p>
+</div>
+<!-- Card 4 -->
+<div class="p-8 bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-b-4 border-transparent hover:border-tertiary-fixed-dim">
+<div class="w-12 h-12 flex items-center justify-center bg-primary-container text-on-primary rounded-lg mb-6">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+</div>
+<h3 class="font-headline text-xl font-bold text-primary mb-4">Đào tạo Đội ngũ</h3>
+<p class="text-secondary text-sm leading-relaxed">Nâng cao năng lực kỹ thuật và quản lý cho đội ngũ bảo trì, đảm bảo kế thừa và vận hành an toàn.</p>
+</div>
+</div>
+</section>
+<!-- Projects Section -->
+<section class="py-24 bg-primary text-on-primary" id="projects">
+<div class="max-w-7xl mx-auto px-8">
+<div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+<div class="space-y-4">
+<span class="text-tertiary-fixed-dim font-label text-sm uppercase tracking-widest font-bold">Portfolio</span>
+<h2 class="font-headline text-4xl font-extrabold leading-tight">Các Dự Án Trọng Điểm</h2>
+</div>
+<p class="text-on-primary-container max-w-md text-lg italic">
+                        "Giải quyết bài toán thực tế bằng tư duy hệ thống và kinh nghiệm thực địa."
+                    </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<!-- Project 1 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-video overflow-hidden rounded-xl mb-6">
+<img alt="RTG Optimization" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100" data-alt="Dozens of yellow and blue rubber-tired gantry cranes organized in a geometric pattern at a massive shipping terminal during sunset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9HCfH4bER2j4wN55LRO2DUkB3bGMJcmLVqNmrLQLxeLN6aV8aKHy1oI2RFOsSoJgl9XxE_Cldldc8Dor2f6bRQyNbvUhwgkjuXRsRmUfMgJZr6JlgFQBhZNVqH5fFv5Q8HlkxCqTkUbszfvKNbRflME-xOfZA3xkdc-6HRJL53o9hETbvws9rebNfL1W1Yy01EnfTb7vq1ced5Frr53YIxJ91ITMCWjKkfwvmRRQxnEU4AHjbyS3ugfZ5L8FVEnIXPXxU3XWbQBk"/>
+<div class="absolute top-4 right-4 bg-primary-container/90 px-4 py-1 rounded text-xs font-bold tracking-tighter">SUCCESS CASE</div>
+</div>
+<h3 class="font-headline text-2xl font-bold mb-3 group-hover:text-tertiary-fixed-dim transition-colors">Tối ưu hóa đội cẩu RTG tại Cảng [SPPSA]</h3>
+<p class="text-on-primary-container/80 text-sm mb-6 leading-relaxed">
+                            Triển khai quy trình bảo trì tập trung, giúp giảm 10% chi phí bảo trì hàng năm và tăng 15% khả năng sẵn sàng của thiết bị trong giờ cao điểm.
+                        </p>
+<div class="flex items-center gap-2 text-tertiary-fixed-dim font-bold text-sm">
+<span>XEM CHI TIẾT</span>
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+</div>
+</div>
+<!-- Project 2 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-video overflow-hidden rounded-xl mb-6">
+<img alt="CMMS Implementation" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100" data-alt="Digital interface showing logistics analytics and maintenance schedules overlaid on a blurred background of a modern industrial control room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxQXsaNl7T4Q7NYgHbUEmrORA0f7LWG1QLEGTGAZQNjt4iNXgPycDw_E5rpo6Fa9mdl_rJ-JgfKzmmvTAKN4ZwHRBqIQC9mdwtE8_B9lHMijh0HbQH48Ky3nQFW2hpBiEpopEELDAqf6czKqYOKeEWytT1y45IBX9qg73L5GCYgEEQ5kAYVDQ-CK91d-dr5kmaRGE3pZnb6hbLfpHWmSlDTQ5J71p-76xkt4FpK4DGfHNDXPt3bJ2zzxTQUOntXXDfwfHIvQ4ux80"/>
+<div class="absolute top-4 right-4 bg-primary-container/90 px-4 py-1 rounded text-xs font-bold tracking-tighter">DIGITAL TRANSFORMATION</div>
+</div>
+<h3 class="font-headline text-2xl font-bold mb-3 group-hover:text-tertiary-fixed-dim transition-colors">Triển khai hệ thống CMMS cho [SPPSA]</h3>
+<p class="text-on-primary-container/80 text-sm mb-6 leading-relaxed">
+                            Số hóa toàn bộ hồ sơ thiết bị và lịch trình bảo trì. Kết quả tăng 10% năng suất làm việc của đội ngũ kỹ thuật và minh bạch hóa chi phí phụ tùng.
+                        </p>
+<div class="flex items-center gap-2 text-tertiary-fixed-dim font-bold text-sm">
+<span>XEM CHI TIẾT</span>
+<span class="material-symbols-outlined text-sm" data-icon="terminal">terminal</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Contact Section -->
+<section class="py-24 px-8 max-w-7xl mx-auto" id="contact">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-20">
+<div class="space-y-12">
+<div class="space-y-4">
+<h2 class="font-headline text-4xl font-extrabold text-primary">Sẵn Sàng Đồng Hành?</h2>
+<p class="text-secondary text-lg">Liên hệ để thảo luận về giải pháp tối ưu cho hệ thống thiết bị cảng của bạn.</p>
+</div>
+<div class="space-y-8">
+<div class="flex items-start gap-6">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-container-high rounded-lg text-primary">
+<span class="material-symbols-outlined" data-icon="mail">mail</span>
+</div>
+<div>
+<p class="text-sm font-label text-outline uppercase tracking-wider">Email</p>
+<p class="text-xl font-bold text-primary">ABC@GMAIL.COM</p>
+</div>
+</div>
+<div class="flex items-start gap-6">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-container-high rounded-lg text-primary">
+<span class="material-symbols-outlined" data-icon="call">call</span>
+</div>
+<div>
+<p class="text-sm font-label text-outline uppercase tracking-wider">Hotline</p>
+<p class="text-xl font-bold text-primary">0909123456</p>
+</div>
+</div>
+<div class="flex items-start gap-6">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-container-high rounded-lg text-primary">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+</div>
+<div>
+<p class="text-sm font-label text-outline uppercase tracking-wider">LinkedIn</p>
+<a class="text-xl font-bold text-primary hover:text-tertiary-container transition-colors" href="#">Nguyen Van A - Maritime Expert</a>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-10 rounded-2xl shadow-sm border border-outline-variant/10">
+<form class="space-y-6">
+<div class="space-y-2">
+<label class="text-sm font-bold text-primary">Họ và tên</label>
+<input class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-md focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all outline-none" placeholder="Nhập tên của bạn" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-primary">Email liên hệ</label>
+<input class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-md focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all outline-none" placeholder="example@email.com" type="email"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-primary">Nội dung trao đổi</label>
+<textarea class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-md focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all outline-none" placeholder="Bạn cần tư vấn về dịch vụ nào?" rows="4"></textarea>
+</div>
+<button class="w-full py-4 bg-primary text-on-primary font-bold rounded-md hover:bg-primary-container transition-all transform active:scale-[0.98] shadow-lg" type="submit">
+                            Gửi Yêu Cầu Tư Vấn
+                        </button>
+</form>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (Shared: Footer) -->
+<footer class="w-full py-12 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto">
+<div class="font-manrope font-bold text-blue-900 dark:text-blue-100 mb-6 md:mb-0">
+                NGUYEN VAN A
+            </div>
+<div class="flex flex-col items-center md:items-end gap-2">
+<div class="flex space-x-8 mb-4">
+<a class="text-slate-500 dark:text-slate-400 hover:text-orange-500 transition-colors font-inter text-sm tracking-wide" href="#">Privacy Policy</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-orange-500 transition-colors font-inter text-sm tracking-wide" href="#">Terms of Service</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-orange-500 transition-colors font-inter text-sm tracking-wide" href="#">LinkedIn</a>
+</div>
+<p class="text-slate-500 dark:text-slate-400 font-inter text-xs tracking-wide">© 2026 NGUYEN VAN A. All rights reserved.</p>
+</div>
+</div>
+</footer>
+</body></html>
