@@ -5,6 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>NGUYEN VAN A | Seaport Equipment Management Expert</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -88,6 +89,67 @@
             .asymmetric-grid {
                 grid-template-columns: 1fr;
             }
+        }
+        
+        /* Chatbot Style & Markdown */
+        .glass-chat {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .dark .glass-chat {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .chat-markdown p { line-height: 1.6; margin-bottom: 0.75rem; }
+        .chat-markdown ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        .chat-markdown ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        .chat-markdown li { margin-bottom: 0.25rem; }
+        .chat-markdown strong { font-weight: 700; color: #1b365d; }
+        .dark .chat-markdown strong { color: #d1e4ff; }
+        .chat-markdown code {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            font-family: 'Fira Code', Consolas, monospace;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+        }
+        .chat-markdown pre code {
+            display: block;
+            padding: 1rem;
+            overflow-x: auto;
+            margin-bottom: 0.75rem;
+        }
+        .chat-markdown blockquote {
+            border-left: 4px solid #74777f;
+            padding-left: 1rem;
+            margin-left: 0;
+            margin-bottom: 0.75rem;
+            color: #44474e;
+            font-style: italic;
+        }
+        .dark .chat-markdown blockquote { color: #c4c6cf; border-left-color: #74777f; }
+        .chat-markdown > *:last-child { margin-bottom: 0; }
+
+        /* Typing Animation */
+        .typing-dot {
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        .spin-anim {
+            animation: spin 0.5s linear;
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -339,4 +401,170 @@
 </div>
 </div>
 </footer>
+
+<!-- Floating Chatbot UI -->
+<div id="chatbot-container" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <!-- Chat Window (Hidden by default) -->
+    <div id="chat-window" class="hidden w-[350px] sm:w-[400px] h-[500px] max-h-[80vh] mb-4 glass-chat rounded-2xl shadow-2xl flex-col transition-all origin-bottom-right">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200/50 dark:border-gray-700/50">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-on-primary">
+                        <span class="material-symbols-outlined">smart_toy</span>
+                    </div>
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></div>
+                </div>
+                <div>
+                    <h3 class="font-headline font-bold text-primary dark:text-gray-100 text-base">Trợ Lý Ảo</h3>
+                    <p class="text-xs text-green-600 dark:text-green-400 font-medium">Đang hoạt động</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="chat-refresh" class="p-1.5 text-secondary hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors" title="Làm mới">
+                    <span class="material-symbols-outlined text-[20px]">refresh</span>
+                </button>
+                <button id="chat-close" class="p-1.5 text-secondary hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors" title="Đóng">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4">
+            <!-- Messages go here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 border-t border-gray-200/50 dark:border-gray-700/50">
+            <form id="chat-form" class="relative">
+                <input type="text" id="chat-input" class="w-full bg-surface-container-low dark:bg-slate-800/80 text-on-surface dark:text-gray-200 rounded-xl pr-12 pl-4 py-3 outline-none border border-transparent focus:border-primary/30 transition-all shadow-sm" placeholder="Nhập tin nhắn..." autocomplete="off">
+                <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-primary dark:text-blue-300 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined">send</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Floating Button -->
+    <button id="chat-toggle" class="w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+        <span id="chat-toggle-icon" class="material-symbols-outlined text-[28px]">chat</span>
+    </button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const chatWindow = document.getElementById('chat-window');
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatToggleIcon = document.getElementById('chat-toggle-icon');
+        const chatClose = document.getElementById('chat-close');
+        const chatRefresh = document.getElementById('chat-refresh');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        
+        const defaultGreeting = "Xin chào! Tôi là Trợ lý Ảo hỗ trợ quản lý thiết bị cảng biển. Bạn cần tư vấn thông tin gì?";
+        let isChatOpen = false;
+
+        function addMessage(content, isBot = false, isTypingIndicator = false) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${isBot ? 'justify-start' : 'justify-end'} w-full`;
+            if (isTypingIndicator) wrapper.id = 'typing-indicator-wrapper';
+            
+            const msgBubble = document.createElement('div');
+            msgBubble.className = `max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
+                isBot 
+                ? 'bg-surface-container-high dark:bg-slate-800 text-on-surface dark:text-gray-200 rounded-tl-sm chat-markdown border border-black/5 dark:border-white/5 shadow-sm'
+                : 'bg-primary text-on-primary rounded-tr-sm shadow-md'
+            }`;
+            
+            if (isTypingIndicator) {
+                msgBubble.innerHTML = `
+                    <p class="text-[11px] font-bold text-secondary mb-1 uppercase tracking-wider">Đang nhập...</p>
+                    <div class="flex gap-1.5 items-center h-4 py-1">
+                        <div class="w-2 h-2 bg-secondary/80 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-secondary/80 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-secondary/80 rounded-full typing-dot"></div>
+                    </div>
+                `;
+            } else if (isBot) {
+                msgBubble.innerHTML = marked.parse(content);
+            } else {
+                msgBubble.textContent = content;
+            }
+            
+            wrapper.appendChild(msgBubble);
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator-wrapper');
+            if (indicator) indicator.remove();
+        }
+
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            if (isChatOpen) {
+                chatWindow.classList.remove('hidden');
+                chatWindow.classList.add('flex');
+                chatToggleIcon.textContent = 'expand_more';
+                if (chatMessages.children.length === 0) {
+                    addMessage(defaultGreeting, true);
+                }
+                setTimeout(() => chatInput.focus(), 100);
+            } else {
+                chatWindow.classList.add('hidden');
+                chatWindow.classList.remove('flex');
+                chatToggleIcon.textContent = 'chat';
+            }
+        }
+
+        chatToggle.addEventListener('click', toggleChat);
+        chatClose.addEventListener('click', toggleChat);
+
+        chatRefresh.addEventListener('click', () => {
+            const icon = chatRefresh.querySelector('.material-symbols-outlined');
+            icon.classList.add('spin-anim');
+            
+            chatMessages.innerHTML = '';
+            addMessage(defaultGreeting, true);
+            
+            setTimeout(() => {
+                icon.classList.remove('spin-anim');
+            }, 500);
+        });
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = chatInput.value.trim();
+            if (!text) return;
+            
+            addMessage(text, false);
+            chatInput.value = '';
+            
+            setTimeout(() => {
+                addMessage('', true, true);
+                
+                // Simulate AI response
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    const mockAiResponse = 
+                        "Tôi đã nhận được câu hỏi từ bạn. Đây là phản hồi dưới dạng Markdown:\n\n" +
+                        "### 1. Phân tích nguyên nhân\n" +
+                        "Dựa trên dữ liệu bảo trì, nguyên nhân phổ biến bao gồm:\n" +
+                        "- Quá tải kết cấu khung thép (Stresses).\n" +
+                        "- Mài mòn cáp tời (Hoist ropes wear).\n\n" +
+                        "***\n" +
+                        "### 2. Giải pháp đề xuất\n" +
+                        "> " + text + "\n\n" +
+                        "Hãy kiểm tra lại đoạn cấu hình sau bằng cách cập nhật thông số sensor:\n" +
+                        "```json\n{\n  \"sensor_id\": \"S-104\",\n  \"calibration\": true\n}\n```\n" +
+                        "Bạn có cần hướng dẫn **chi tiết hơn** không?";
+                    addMessage(mockAiResponse, true);
+                }, 1800 + Math.random() * 1000);
+            }, 300);
+        });
+    });
+</script>
 </body></html>
