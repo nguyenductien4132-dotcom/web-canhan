@@ -1,0 +1,14 @@
+* Tên chuyên gia: Nguyễn Văn A
+* Định vị: Chuyên gia thiết bị cảng (STS, RTG, Reach Stacker, CMMS)
+* Yếu tố đặc sắc: Giải quyết bài toán thực tế bằng tư duy hệ thống và kinh nghiệm thực địa
+* Giải pháp:
+  - Chiến lược bảo trì (Preventive & Predictive)
+  - Tối ưu hóa Vận hành (Nâng cao OEE, giảm downtime)
+  - Tư vấn đầu tư mua sắm thiết bị
+* Dịch vụ:
+  - Tư vấn thiết lập hệ thống quản lý bảo trì (CMMS)
+  - Khóa học đào tạo đội ngũ kỹ thuật nâng cao năng lực
+* Liên hệ:
+  - Email: a@example.com
+  - SĐT hoặc Zalo: 0909123456
+  - Vị trí: Việt Nam

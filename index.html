@@ -463,12 +463,52 @@
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
         
-        const defaultGreeting = "Xin chào! Tôi là Trợ lý Ảo hỗ trợ quản lý thiết bị cảng biển. Bạn cần tư vấn thông tin gì?";
+        const defaultGreeting = "Xin chào! Tôi là Trợ lý Ảo hỗ trợ quản lý thiết bị cảng biển của chuyên gia Nguyễn Văn A. Bạn cần tư vấn thông tin gì?";
         let isChatOpen = false;
+        
+        // --- API CONFIGURATION ---
+        const OPENROUTER_API_KEY = "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";
+        const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+        const MODEL = "z-ai/glm-4.5-air:free";
+
+        // --- MESSAGE HISTORY AND PROMPT ---
+        let messageHistory = [];
+        let systemPrompt = "";
+
+        // Load Knowledge Base
+        async function loadSystemPrompt() {
+            try {
+                // Load info from local file
+                const response = await fetch('./chatbot_data.txt');
+                const kbData = response.ok ? await response.text() : "Thông tin chung về thiết bị cảng.";
+                
+                systemPrompt = `
+Bạn là AI trợ lý độc quyền của chuyên gia Nguyễn Văn A.
+CHỈ ĐƯỢC trả lời dựa trên Knowledge Base sau:
+---
+${kbData}
+---
+Quy tắc trả lời:
+1. Chào hỏi thân thiện nhưng chuyên nghiệp.
+2. Trả lời rõ ràng, đúng trọng tâm bằng các định dạng Markdown rõ ràng.
+3. Luôn kết thúc bằng một câu hỏi mở hoặc đề nghị liên hệ.
+4. Nếu khách hỏi vấn đề ngoài chuyên môn/lĩnh vực cảng biển, từ chối nhẹ nhàng và báo rằng bạn chỉ xử lý lĩnh vực thiết bị kỹ thuật cảng.
+`;
+                // Build initial array
+                messageHistory = [{ role: 'system', content: systemPrompt }];
+            } catch (err) {
+                console.error("Lỗi khi đọc file TXT:", err);
+                systemPrompt = "Bạn là trợ lý ảo Nguyễn Văn A chuyên tư vấn thiết bị cảng.";
+                messageHistory = [{ role: 'system', content: systemPrompt }];
+            }
+        }
+
+        loadSystemPrompt();
 
         function addMessage(content, isBot = false, isTypingIndicator = false) {
             const wrapper = document.createElement('div');
-            wrapper.className = `flex ${isBot ? 'justify-start' : 'justify-end'} w-full`;
+            // Adding fade-in slide effect classes
+            wrapper.className = `flex ${isBot ? 'justify-start' : 'justify-end'} w-full transition-all duration-300 opacity-0 translate-y-4`;
             if (isTypingIndicator) wrapper.id = 'typing-indicator-wrapper';
             
             const msgBubble = document.createElement('div');
@@ -495,6 +535,12 @@
             
             wrapper.appendChild(msgBubble);
             chatMessages.appendChild(wrapper);
+            
+            // Trigger animation frame
+            requestAnimationFrame(() => {
+                wrapper.classList.remove('opacity-0', 'translate-y-4');
+            });
+            
             chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
         }
 
@@ -511,6 +557,7 @@
                 chatToggleIcon.textContent = 'expand_more';
                 if (chatMessages.children.length === 0) {
                     addMessage(defaultGreeting, true);
+                    messageHistory.push({ role: 'assistant', content: defaultGreeting });
                 }
                 setTimeout(() => chatInput.focus(), 100);
             } else {
@@ -528,14 +575,19 @@
             icon.classList.add('spin-anim');
             
             chatMessages.innerHTML = '';
+            
+            // Reset message history keeping only system prompt
+            messageHistory = [{ role: 'system', content: systemPrompt }];
+            
             addMessage(defaultGreeting, true);
+            messageHistory.push({ role: 'assistant', content: defaultGreeting });
             
             setTimeout(() => {
                 icon.classList.remove('spin-anim');
             }, 500);
         });
 
-        chatForm.addEventListener('submit', (e) => {
+        chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = chatInput.value.trim();
             if (!text) return;
@@ -543,38 +595,54 @@
             addMessage(text, false);
             chatInput.value = '';
             
-            setTimeout(() => {
-                addMessage('', true, true);
+            // Store user message
+            messageHistory.push({ role: 'user', content: text });
+            
+            addMessage('', true, true);
+            
+            try {
+                const response = await fetch(OPENROUTER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                        'HTTP-Referer': window.location.href,
+                        'X-Title': "AIVoice Port Assistant", 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: MODEL,
+                        messages: messageHistory,
+                    })
+                });
                 
-                // Smart Mock Response Logic OR AI API Hook
-                setTimeout(() => {
-                    removeTypingIndicator();
-                    
-                    let response = "";
-                    const lowerText = text.toLowerCase();
-                    
-                    if (lowerText.includes("chào") || lowerText.includes("hi ") || lowerText.includes("hello")) {
-                        response = "Chào bạn! Rất vui được hỗ trợ. Hiện tại bạn đang thắc mắc về vấn đề kỹ thuật nào của thiết bị cảng?";
-                    } 
-                    else if (lowerText.includes("giá") || lowerText.includes("chi phí") || lowerText.includes("báo giá")) {
-                        response = "Về **chi phí** các giải pháp tối ưu hệ thống thiết bị cảng, chúng tôi cần thêm một vài con số cụ thể về quy mô cảng của bạn (số lượng cẩu STS/RTG). Bạn vui lòng **để lại Email/SĐT** hoặc gọi trực tiếp Hotline `0909123456` nhé!";
-                    }
-                    else if (lowerText.includes("bảo trì") || lowerText.includes("sửa chữa") || lowerText.includes("hư hỏng")) {
-                        response = "Đối với **bảo trì**, giải pháp của tôi ưu tiên yếu tố *Phòng ngừa (Preventive)* thay vì chỉ chờ hỏng mới sửa. Quy trình CMMS có thể giúp bạn giảm được đến 15% sự cố bất ngờ.\n\nBạn quan tâm đến quy trình này chứ?";
-                    }
-                    else if (lowerText.includes("cmms") || lowerText.includes("số hóa") || lowerText.includes("phần mềm")) {
-                        response = "Hệ thống quản lý bảo trì thông minh (CMMS) là một trong những thế mạnh của tôi! Đã từng triển khai thành công tại **Cảng SPPSA**, giúp đội ngũ kỹ thuật tương tác số hóa 100%.\n\nBạn muốn trao đổi sâu hơn về kiến trúc hệ thống này?";
-                    }
-                    else if (lowerText.includes("rtg") || lowerText.includes("sts") || lowerText.includes("cẩu")) {
-                        response = "Đối với các cẩu khổng lồ như **STS** và **RTG**, kiểm soát hao mòn cáp, kết cấu thép và hệ thống điện là bài toán then chốt. \n\n```text\nKhuyến nghị: Chú ý thời gian mỏi (fatigue cycle) của vật liệu.\n```\nHãy gọi trao đổi cụ thể hơn với tôi nhé.";
-                    }
-                    else {
-                        response = "Cảm ơn bạn đã đặt câu hỏi. Đây là vấn đề tôi thường gặp trong quá trình vận hành! Do tính chất phức tạp của hệ thống cảng, tôi khuyên bạn nên **liên hệ trực tiếp hotline `0909123456`** để được tôi (Nguyễn Văn A) giải đáp cặn kẽ.\n\nBạn có câu hỏi nào khác ở mức độ khái quát (như *bảo trì*, *phần mềm CMMS*, *quản lý RTG*) không?";
-                    }
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const aiResponseText = data.choices[0].message.content;
+                
+                removeTypingIndicator();
+                addMessage(aiResponseText, true);
+                
+                // Store AI content
+                messageHistory.push({ role: 'assistant', content: aiResponseText });
+                
+            } catch (err) {
+                console.error("Lỗi:", err);
+                removeTypingIndicator();
+                addMessage("⚠️ **Lỗi hệ thống:** Xin lỗi, API hiện không khả dụng. Bạn vui lòng thử lại sau.", true);
+                // Remove the last user message to allow retry
+                messageHistory.pop();
+            }
+        });
 
-                    addMessage(response, true);
-                }, 1000 + Math.random() * 800);
-            }, 300);
+        // Submit via enter without shift
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
         });
     });
 </script>
