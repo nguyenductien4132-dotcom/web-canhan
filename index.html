@@ -605,49 +605,111 @@
 
     <script>
         // ============================================================
-        // CẤU HÌNH GOOGLE SHEETS LEAD CAPTURE
+        // CẤU HÌNH GOOGLE SHEETS LEAD CAPTURE (DUAL MODE)
+        // Mode 1: Bóc tag ẩn ||LEAD_DATA:|| từ AI (khi model mạnh)
+        // Mode 2: Tự trích xuất từ tin nhắn user bằng regex (fallback)
         // ============================================================
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzg8O8AUij8J_GY-ek2LMdTcM9hRXfrgs7SdM6BrRJ8B9rrYUuh0kG9CWZG9VDEbU4L/exec';
         let AI_CHAT_SESSION_ID = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
 
+        // Biến tích lũy thông tin lead qua nhiều lượt chat
+        let collectedLead = { name: null, phone: null, email: null };
+
         /**
-         * Hàm xử lý response từ AI:
-         * 1. Kiểm tra có tag ||LEAD_DATA:...|| không
-         * 2. Nếu có → Parse JSON → Gửi lên Google Sheets kèm Lịch sử Chat & Session ID
-         * 3. Xóa tag khỏi câu trả lời → Trả về response sạch cho hiển thị
+         * FALLBACK: Tự trích xuất thông tin từ tin nhắn USER bằng regex
+         * Không phụ thuộc vào AI có chèn tag hay không
+         */
+        function extractLeadFromUserMessage(text) {
+            const extracted = { name: null, phone: null, email: null };
+
+            // Trích xuất SĐT (VN: 0xxx hoặc +84xxx, 9-11 chữ số)
+            const phoneMatch = text.match(/(?:\+84|0)[\s.-]?\d{2,3}[\s.-]?\d{3}[\s.-]?\d{3,4}/);
+            if (phoneMatch) {
+                extracted.phone = phoneMatch[0].replace(/[\s.-]/g, '');
+            }
+
+            // Trích xuất Email
+            const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+            if (emailMatch) {
+                extracted.email = emailMatch[0];
+            }
+
+            // Trích xuất Tên (các pattern phổ biến tiếng Việt)
+            const namePatterns = [
+                /(?:tôi là|tên tôi là|mình là|tên mình là|tôi tên|tên là|tôi là|em là|anh là|chị là)\s+([A-ZÀ-Ỹa-zà-ỹ]+(?:\s+[A-ZÀ-Ỹa-zà-ỹ]+){0,4})/i,
+                /(?:my name is|i am|i'm)\s+([A-Za-z]+(?:\s+[A-Za-z]+){0,3})/i
+            ];
+            for (const pattern of namePatterns) {
+                const nameMatch = text.match(pattern);
+                if (nameMatch && nameMatch[1]) {
+                    // Loại bỏ các từ không phải tên
+                    const notNames = ['muốn', 'cần', 'hỏi', 'xin', 'có', 'đang', 'sẽ', 'rất', 'want', 'need', 'looking'];
+                    const candidate = nameMatch[1].trim();
+                    if (!notNames.some(w => candidate.toLowerCase().startsWith(w))) {
+                        extracted.name = candidate;
+                        break;
+                    }
+                }
+            }
+
+            return extracted;
+        }
+
+        /**
+         * Hàm xử lý response từ AI (DUAL MODE):
+         * Mode 1: Bóc tag ||LEAD_DATA:|| nếu AI có chèn
+         * Mode 2: Scan toàn bộ tin nhắn user để trích xuất thông tin (fallback)
          */
         function processAIResponse(aiResponse, chatHistoryArray = []) {
             const dataPattern = /\|\|LEAD_DATA:\s*(\{.*?\})\s*\|\|/;
 
-            // Xây dựng lại Text Lịch sử Chat cho dễ đọc trên Google Sheets
+            // Xây dựng Text Lịch sử Chat cho Google Sheets
             let formattedHistory = "";
             if (chatHistoryArray && chatHistoryArray.length > 0) {
                 formattedHistory = chatHistoryArray.map(msg => {
-                    if (msg.role === 'system') return null; // Bỏ qua system prompt
+                    if (msg.role === 'system') return null;
                     let role = msg.role === 'user' ? 'Khách' : 'AI';
                     let content = msg.content.replace(dataPattern, "").trim();
                     return `${role}: ${content}`;
                 }).filter(Boolean).join('\n\n');
             }
 
+            let hasNewData = false;
+
+            // === MODE 1: Bóc tag ẩn từ AI response ===
             if (aiResponse.includes("||LEAD_DATA:")) {
                 const match = aiResponse.match(dataPattern);
-
                 if (match && match[1]) {
                     try {
                         const leadData = JSON.parse(match[1]);
-                        console.log("✅ Dữ liệu khách hàng bóc được:", leadData);
-
-                        // Gửi dữ liệu nếu có ít nhất 1 thông tin hữu ích
-                        if (leadData.name || leadData.phone || leadData.email) {
-                            sendLeadToGoogleSheets(leadData, formattedHistory);
-                        }
+                        console.log("✅ [MODE 1] Tag ẩn AI:", leadData);
+                        if (leadData.name && !collectedLead.name) { collectedLead.name = leadData.name; hasNewData = true; }
+                        if (leadData.phone && !collectedLead.phone) { collectedLead.phone = leadData.phone; hasNewData = true; }
+                        if (leadData.email && !collectedLead.email) { collectedLead.email = leadData.email; hasNewData = true; }
                     } catch (error) {
                         console.error("❌ Lỗi parse JSON từ AI:", error);
                     }
                 }
                 aiResponse = aiResponse.replace(dataPattern, "").trim();
             }
+
+            // === MODE 2: Fallback — Scan tin nhắn user bằng regex ===
+            if (chatHistoryArray && chatHistoryArray.length > 0) {
+                for (const msg of chatHistoryArray) {
+                    if (msg.role !== 'user') continue;
+                    const extracted = extractLeadFromUserMessage(msg.content);
+                    if (extracted.name && !collectedLead.name) { collectedLead.name = extracted.name; hasNewData = true; }
+                    if (extracted.phone && !collectedLead.phone) { collectedLead.phone = extracted.phone; hasNewData = true; }
+                    if (extracted.email && !collectedLead.email) { collectedLead.email = extracted.email; hasNewData = true; }
+                }
+            }
+
+            // Gửi lên Google Sheets nếu có thông tin mới
+            if (hasNewData && (collectedLead.name || collectedLead.phone || collectedLead.email)) {
+                console.log("✅ Dữ liệu khách hàng tích lũy:", JSON.parse(JSON.stringify(collectedLead)));
+                sendLeadToGoogleSheets(collectedLead, formattedHistory);
+            }
+
             return aiResponse;
         }
 
@@ -809,6 +871,8 @@ TUYỆT ĐỐI KHÔNG giải thích hay đề cập đến đoạn mã này cho 
 
                 // Tạo session ID mới cho phiên chat mới
                 AI_CHAT_SESSION_ID = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+                // Reset dữ liệu lead cho phiên mới
+                collectedLead = { name: null, phone: null, email: null };
 
                 addMessage(defaultGreeting, true);
                 messageHistory.push({ role: 'assistant', content: defaultGreeting });
