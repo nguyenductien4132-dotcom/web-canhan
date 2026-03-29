@@ -604,6 +604,78 @@
     </div>
 
     <script>
+        // ============================================================
+        // CẤU HÌNH GOOGLE SHEETS LEAD CAPTURE
+        // ============================================================
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzg8O8AUij8J_GY-ek2LMdTcM9hRXfrgs7SdM6BrRJ8B9rrYUuh0kG9CWZG9VDEbU4L/exec';
+        let AI_CHAT_SESSION_ID = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+
+        /**
+         * Hàm xử lý response từ AI:
+         * 1. Kiểm tra có tag ||LEAD_DATA:...|| không
+         * 2. Nếu có → Parse JSON → Gửi lên Google Sheets kèm Lịch sử Chat & Session ID
+         * 3. Xóa tag khỏi câu trả lời → Trả về response sạch cho hiển thị
+         */
+        function processAIResponse(aiResponse, chatHistoryArray = []) {
+            const dataPattern = /\|\|LEAD_DATA:\s*(\{.*?\})\s*\|\|/;
+
+            // Xây dựng lại Text Lịch sử Chat cho dễ đọc trên Google Sheets
+            let formattedHistory = "";
+            if (chatHistoryArray && chatHistoryArray.length > 0) {
+                formattedHistory = chatHistoryArray.map(msg => {
+                    if (msg.role === 'system') return null; // Bỏ qua system prompt
+                    let role = msg.role === 'user' ? 'Khách' : 'AI';
+                    let content = msg.content.replace(dataPattern, "").trim();
+                    return `${role}: ${content}`;
+                }).filter(Boolean).join('\n\n');
+            }
+
+            if (aiResponse.includes("||LEAD_DATA:")) {
+                const match = aiResponse.match(dataPattern);
+
+                if (match && match[1]) {
+                    try {
+                        const leadData = JSON.parse(match[1]);
+                        console.log("✅ Dữ liệu khách hàng bóc được:", leadData);
+
+                        // Gửi dữ liệu nếu có ít nhất 1 thông tin hữu ích
+                        if (leadData.name || leadData.phone || leadData.email) {
+                            sendLeadToGoogleSheets(leadData, formattedHistory);
+                        }
+                    } catch (error) {
+                        console.error("❌ Lỗi parse JSON từ AI:", error);
+                    }
+                }
+                aiResponse = aiResponse.replace(dataPattern, "").trim();
+            }
+            return aiResponse;
+        }
+
+        /**
+         * Hàm gửi dữ liệu Lead lên Google Apps Script → Google Sheets
+         */
+        async function sendLeadToGoogleSheets(leadData, chatHistoryText) {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: leadData.name || '',
+                        phone: leadData.phone || '',
+                        email: leadData.email || '',
+                        source: window.location.href,
+                        sessionId: AI_CHAT_SESSION_ID,
+                        chatHistory: chatHistoryText,
+                        timestamp: new Date().toLocaleString('vi-VN')
+                    })
+                });
+                console.log("📤 Đã đồng bộ dữ liệu vào Google Sheets!");
+            } catch (err) {
+                console.warn("⚠️ Không gửi được dữ liệu lead:", err);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const chatWindow = document.getElementById('chat-window');
             const chatToggle = document.getElementById('chat-toggle');
@@ -645,6 +717,11 @@ Quy tắc trả lời:
 2. Trả lời rõ ràng, đúng trọng tâm bằng các định dạng Markdown rõ ràng.
 3. Luôn kết thúc bằng một câu hỏi mở hoặc đề nghị liên hệ.
 4. Nếu khách hỏi vấn đề ngoài chuyên môn/lĩnh vực cảng biển, từ chối nhẹ nhàng và báo rằng bạn chỉ xử lý lĩnh vực thiết bị kỹ thuật cảng.
+
+Quy tắc đặc biệt: Trong quá trình trò chuyện, nếu bạn phát hiện người dùng cung cấp Tên, Số điện thoại hoặc Email, bạn HÃY VỪA trả lời họ bình thường, VỪA chèn thêm một đoạn mã JSON vào cuối cùng của câu trả lời theo đúng định dạng sau:
+||LEAD_DATA: {"name": "...", "phone": "...", "email": "..."}||
+Nếu thông tin nào chưa có, hãy để null.
+TUYỆT ĐỐI KHÔNG giải thích hay đề cập đến đoạn mã này cho người dùng.
 `;
                     // Build initial array
                     messageHistory = [{ role: 'system', content: systemPrompt }];
@@ -730,6 +807,9 @@ Quy tắc trả lời:
                 // Reset message history keeping only system prompt
                 messageHistory = [{ role: 'system', content: systemPrompt }];
 
+                // Tạo session ID mới cho phiên chat mới
+                AI_CHAT_SESSION_ID = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+
                 addMessage(defaultGreeting, true);
                 messageHistory.push({ role: 'assistant', content: defaultGreeting });
 
@@ -772,11 +852,14 @@ Quy tắc trả lời:
                     const data = await response.json();
                     const aiResponseText = data.choices[0].message.content;
 
-                    removeTypingIndicator();
-                    addMessage(aiResponseText, true);
+                    // Bóc tách dữ liệu lead trước khi hiển thị
+                    const cleanResponse = processAIResponse(aiResponseText, messageHistory);
 
-                    // Store AI content
-                    messageHistory.push({ role: 'assistant', content: aiResponseText });
+                    removeTypingIndicator();
+                    addMessage(cleanResponse, true);
+
+                    // Store AI content (bản sạch, không chứa tag ẩn)
+                    messageHistory.push({ role: 'assistant', content: cleanResponse });
 
                 } catch (err) {
                     console.error("Lỗi:", err);
