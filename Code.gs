@@ -27,6 +27,8 @@ function doPost(e) {
     var newSource = data.source || '';
     var newSessionId = data.sessionId || '';
     var newHistory = data.chatHistory || '';
+    var newInterest = data.interest || '';
+    var newIntentLevel = data.intent_level || '';
 
     var dataRange = sheet.getDataRange();
     var values = dataRange.getValues();
@@ -52,6 +54,10 @@ function doPost(e) {
       if (!currentRow[2] && newPhone) sheet.getRange(rowIndexToUpdate, 3).setValue(newPhone);
       if (!currentRow[3] && newEmail) sheet.getRange(rowIndexToUpdate, 4).setValue(newEmail);
       
+      // Cập nhật interest và intent_level
+      if (newInterest) sheet.getRange(rowIndexToUpdate, 8).setValue(newInterest);
+      if (newIntentLevel) sheet.getRange(rowIndexToUpdate, 9).setValue(newIntentLevel);
+      
       // Ghi đè lịch sử chat = bản mới nhất (đầy đủ nhất)
       if (newHistory) sheet.getRange(rowIndexToUpdate, 7).setValue(newHistory);
       
@@ -59,7 +65,33 @@ function doPost(e) {
       sheet.getRange(rowIndexToUpdate, 1).setValue(newTime);
     } else {
       // ============ TẠO DÒNG MỚI (Session chưa tồn tại) ============
-      sheet.appendRow([newTime, newName, newPhone, newEmail, newSource, newSessionId, newHistory]);
+      sheet.appendRow([newTime, newName, newPhone, newEmail, newSource, newSessionId, newHistory, newInterest, newIntentLevel]);
+    }
+    
+    // ============ GỬI EMAIL CẢNH BÁO NẾU KHÁCH "HOT" ============
+    // Gửi email bằng MailApp nếu intent_level là 'hot'
+    var isHot = (newIntentLevel.trim().toLowerCase() === 'hot');
+    var wasHot = (currentRow && currentRow.length > 8 && currentRow[8] && currentRow[8].toString().trim().toLowerCase() === 'hot');
+    
+    if (isHot && !wasHot) {
+      // Đã gán cứng email nhận thông báo theo yêu cầu
+      var emailRecipient = "nguyenductien4132@gmail.com"; 
+      
+      var subject = "📢 KHÁCH HÀNG NÓNG - CẦN LIÊN HỆ NGAY!";
+      var body = "📢 KHÁCH HÀNG NÓNG - CẦN LIÊN HỆ NGAY!\n\n" +
+                 "Tên: " + (newName || "[Chưa có]") + "\n" +
+                 "SĐT: " + (newPhone || "[Chưa có]") + "\n" +
+                 "Email: " + (newEmail || "[Chưa có]") + "\n" +
+                 "Quan tâm: " + (newInterest || "[Chưa có]") + "\n" +
+                 "Thời gian: " + newTime + "\n\n" +
+                 "Vui lòng liên hệ khách hàng này trong vòng 30 phút!";
+                 
+      try {
+        MailApp.sendEmail(emailRecipient, subject, body);
+      } catch (err) {
+        // Log báo lỗi vào sheet để bạn dễ xem (Ghi đè vào Lịch sử Chat để debug, bạn có thể xoá sau)
+        sheet.getRange(rowIndexToUpdate > -1 ? rowIndexToUpdate : dataRange.getLastRow() + 1, 7).setValue(newHistory + "\n\n[LỖI GỬI EMAIL]: " + err.toString());
+      }
     }
     
     return ContentService.createTextOutput(

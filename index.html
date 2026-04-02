@@ -613,7 +613,7 @@
         let AI_CHAT_SESSION_ID = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
 
         // Biến tích lũy thông tin lead qua nhiều lượt chat
-        let collectedLead = { name: null, phone: null, email: null };
+        let collectedLead = { name: null, phone: null, email: null, interest: null, intent_level: null };
 
         /**
          * FALLBACK: Tự trích xuất thông tin từ tin nhắn USER bằng regex
@@ -661,7 +661,7 @@
          * Mode 2: Scan toàn bộ tin nhắn user để trích xuất thông tin (fallback)
          */
         function processAIResponse(aiResponse, chatHistoryArray = []) {
-            const dataPattern = /\|\|LEAD_DATA:\s*(\{.*?\})\s*\|\|/;
+            const dataPattern = /\|\|LEAD_DATA:\s*(\{[\s\S]*?\})\s*\|\|/;
 
             // Xây dựng Text Lịch sử Chat cho Google Sheets
             let formattedHistory = "";
@@ -681,16 +681,23 @@
                 const match = aiResponse.match(dataPattern);
                 if (match && match[1]) {
                     try {
-                        const leadData = JSON.parse(match[1]);
+                        let jsonStr = match[1].trim();
+                        // Fix lỗi: Loại bỏ dấu backticks (```json ... ```) nếu AI lỡ chèn thêm
+                        jsonStr = jsonStr.replace(/^```(json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+                        
+                        const leadData = JSON.parse(jsonStr);
                         console.log("✅ [MODE 1] Tag ẩn AI:", leadData);
                         if (leadData.name && !collectedLead.name) { collectedLead.name = leadData.name; hasNewData = true; }
                         if (leadData.phone && !collectedLead.phone) { collectedLead.phone = leadData.phone; hasNewData = true; }
                         if (leadData.email && !collectedLead.email) { collectedLead.email = leadData.email; hasNewData = true; }
+                        if (leadData.interest && leadData.interest !== collectedLead.interest) { collectedLead.interest = leadData.interest; hasNewData = true; }
+                        if (leadData.intent_level && leadData.intent_level !== collectedLead.intent_level) { collectedLead.intent_level = leadData.intent_level; hasNewData = true; }
                     } catch (error) {
                         console.error("❌ Lỗi parse JSON từ AI:", error);
                     }
                 }
-                aiResponse = aiResponse.replace(dataPattern, "").trim();
+                // Xoá sạnh tag để không lộ ra UI (kể cả khi lỗi parse)
+                aiResponse = aiResponse.replace(/\|\|LEAD_DATA:[\s\S]*/, "").trim();
             }
 
             // === MODE 2: Fallback — Scan tin nhắn user bằng regex ===
@@ -701,11 +708,29 @@
                     if (extracted.name && !collectedLead.name) { collectedLead.name = extracted.name; hasNewData = true; }
                     if (extracted.phone && !collectedLead.phone) { collectedLead.phone = extracted.phone; hasNewData = true; }
                     if (extracted.email && !collectedLead.email) { collectedLead.email = extracted.email; hasNewData = true; }
+                    
+                    // Tính năng đúp: Tự đánh giá KH nếu AI không thèm phản hồi tag \||LEAD_DATA||
+                    const lowerUserMsg = msg.content.toLowerCase();
+                    if (/mua|báo giá|gấp|chốt|hợp đồng|đặt hàng/.test(lowerUserMsg)) {
+                        if (collectedLead.intent_level !== 'hot') {
+                            collectedLead.intent_level = 'hot';
+                            hasNewData = true;
+                        }
+                        if (!collectedLead.interest) {
+                            collectedLead.interest = "Nhu cầu mua hàng khẩn cấp (Regex)";
+                            hasNewData = true;
+                        }
+                    } else if (extracted.phone || extracted.email) {
+                        if (!collectedLead.intent_level || collectedLead.intent_level === 'cold') {
+                            collectedLead.intent_level = 'warm';
+                            hasNewData = true;
+                        }
+                    }
                 }
             }
 
             // Gửi lên Google Sheets nếu có thông tin mới
-            if (hasNewData && (collectedLead.name || collectedLead.phone || collectedLead.email)) {
+            if (hasNewData && (collectedLead.name || collectedLead.phone || collectedLead.email || collectedLead.interest || collectedLead.intent_level)) {
                 console.log("✅ Dữ liệu khách hàng tích lũy:", JSON.parse(JSON.stringify(collectedLead)));
                 sendLeadToGoogleSheets(collectedLead, formattedHistory);
             }
@@ -726,6 +751,8 @@
                         name: leadData.name || '',
                         phone: leadData.phone || '',
                         email: leadData.email || '',
+                        interest: leadData.interest || '',
+                        intent_level: leadData.intent_level || '',
                         source: window.location.href,
                         sessionId: AI_CHAT_SESSION_ID,
                         chatHistory: chatHistoryText,
@@ -780,8 +807,11 @@ Quy tắc trả lời:
 3. Luôn kết thúc bằng một câu hỏi mở hoặc đề nghị liên hệ.
 4. Nếu khách hỏi vấn đề ngoài chuyên môn/lĩnh vực cảng biển, từ chối nhẹ nhàng và báo rằng bạn chỉ xử lý lĩnh vực thiết bị kỹ thuật cảng.
 
-Quy tắc đặc biệt: Trong quá trình trò chuyện, nếu bạn phát hiện người dùng cung cấp Tên, Số điện thoại hoặc Email, bạn HÃY VỪA trả lời họ bình thường, VỪA chèn thêm một đoạn mã JSON vào cuối cùng của câu trả lời theo đúng định dạng sau:
-||LEAD_DATA: {"name": "...", "phone": "...", "email": "..."}||
+Quy tắc đặc biệt: Trong quá trình trò chuyện, nếu bạn phát hiện người dùng cung cấp thông tin liên hệ hoặc có nhu cầu mua hàng, bạn HÃY VỪA trả lời họ bình thường, VỪA chèn thêm một đoạn mã JSON vào cuối cùng của câu trả lời theo đúng định dạng sau:
+||LEAD_DATA: {"name": "...", "phone": "...", "email": "...", "interest": "...", "intent_level": "..."}||
+Trong đó:
+- 'interest': Khách quan tâm sản phẩm/dịch vụ gì? (AI tự phân tích từ nội dung cuộc trò chuyện)
+- 'intent_level': Mức độ sẵn sàng mua hàng: 'hot' / 'warm' / 'cold' (AI tự đánh giá dựa trên ngữ cảnh hội thoại)
 Nếu thông tin nào chưa có, hãy để null.
 TUYỆT ĐỐI KHÔNG giải thích hay đề cập đến đoạn mã này cho người dùng.
 `;
@@ -872,7 +902,7 @@ TUYỆT ĐỐI KHÔNG giải thích hay đề cập đến đoạn mã này cho 
                 // Tạo session ID mới cho phiên chat mới
                 AI_CHAT_SESSION_ID = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
                 // Reset dữ liệu lead cho phiên mới
-                collectedLead = { name: null, phone: null, email: null };
+                collectedLead = { name: null, phone: null, email: null, interest: null, intent_level: null };
 
                 addMessage(defaultGreeting, true);
                 messageHistory.push({ role: 'assistant', content: defaultGreeting });
